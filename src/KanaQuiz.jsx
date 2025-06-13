@@ -11,7 +11,6 @@ const hiraganaData = {
   "Ya": "や", "Yu": "ゆ", "Yo": "よ",
   "Ra": "ら", "Ri": "り", "Ru": "る", "Re": "れ", "Ro": "ろ",
   "Wa": "わ", "Wo": "を", "N": "ん",
-  // Yoon
   "Kya": "きゃ", "Kyu": "きゅ", "Kyo": "きょ",
   "Sha": "しゃ", "Shu": "しゅ", "Sho": "しょ",
   "Cha": "ちゃ", "Chu": "ちゅ", "Cho": "ちょ",
@@ -36,7 +35,6 @@ const katakanaData = {
   "Ya": "ヤ", "Yu": "ユ", "Yo": "ヨ",
   "Ra": "ラ", "Ri": "リ", "Ru": "ル", "Re": "レ", "Ro": "ロ",
   "Wa": "ワ", "Wo": "ヲ", "N": "ン",
-  // Yoon
   "Kya": "キャ", "Kyu": "キュ", "Kyo": "キョ",
   "Sha": "シャ", "Shu": "シュ", "Sho": "ショ",
   "Cha": "チャ", "Chu": "チュ", "Cho": "チョ",
@@ -48,7 +46,6 @@ const katakanaData = {
   "Ja": "ジャ", "Ju": "ジュ", "Jo": "ジョ",
   "Bya": "ビャ", "Byu": "ビュ", "Byo": "ビョ",
   "Pya": "ピャ", "Pyu": "ピュ", "Pyo": "ピョ",
-  // Katakana asing
   "Fa": "ファ", "Fi": "フィ", "Fe": "フェ", "Fo": "フォ",
   "Ti": "ティ", "Di": "ディ", "Du": "ドゥ",
   "Che": "チェ", "She": "シェ", "Je": "ジェ",
@@ -90,14 +87,14 @@ export default function KanaQuiz() {
   const handleAnswer = (answer) => {
     const correctRomaji = Object.keys(data).find(k => data[k] === question);
     if (answer === correctRomaji) {
-      setFeedback("Benar!");
+      setFeedback("✅ Benar!");
       setUsedKeys([...usedKeys, correctRomaji]);
       setTimeout(() => {
         setFeedback("");
         generateQuestion();
       }, 1000);
     } else {
-      setFeedback(`Salah. Jawaban: ${correctRomaji}`);
+      setFeedback(`❌ Salah. Jawaban: ${correctRomaji}`);
       setTimeout(() => setFeedback(""), 1500);
     }
   };
@@ -108,24 +105,86 @@ export default function KanaQuiz() {
   }, [mode]);
 
   return (
-    <div style={{ padding: "2rem", textAlign: "center" }}>
-      <h1>Tebak {mode === "hiragana" ? "Hiragana" : "Katakana"}</h1>
-      <div>
-        <button onClick={() => setMode("hiragana")}>Hiragana</button>
-        <button onClick={() => setMode("katakana")}>Katakana</button>
+    <div style={{
+      padding: "2rem",
+      maxWidth: "600px",
+      margin: "0 auto",
+      fontFamily: "Arial, sans-serif",
+      color: "#333"
+    }}>
+      <h1 style={{ fontSize: "2rem", marginBottom: "1rem", color: "#3b82f6" }}>
+        Tebak {mode === "hiragana" ? "Hiragana" : "Katakana"}
+      </h1>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <button
+          onClick={() => setMode("hiragana")}
+          style={{
+            padding: "0.5rem 1rem",
+            marginRight: "0.5rem",
+            backgroundColor: mode === "hiragana" ? "#3b82f6" : "#e0e0e0",
+            color: mode === "hiragana" ? "#fff" : "#333",
+            border: "none",
+            borderRadius: "0.5rem",
+            cursor: "pointer"
+          }}
+        >
+          Hiragana
+        </button>
+        <button
+          onClick={() => setMode("katakana")}
+          style={{
+            padding: "0.5rem 1rem",
+            backgroundColor: mode === "katakana" ? "#3b82f6" : "#e0e0e0",
+            color: mode === "katakana" ? "#fff" : "#333",
+            border: "none",
+            borderRadius: "0.5rem",
+            cursor: "pointer"
+          }}
+        >
+          Katakana
+        </button>
       </div>
+
       {question ? (
         <>
-          <div style={{ fontSize: "4rem" }}>{question}</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+          <div style={{ fontSize: "5rem", margin: "1rem 0" }}>{question}</div>
+
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "1rem",
+            marginBottom: "1rem"
+          }}>
             {options.map((opt, idx) => (
-              <button key={idx} onClick={() => handleAnswer(opt)}>{opt}</button>
+              <button
+                key={idx}
+                onClick={() => handleAnswer(opt)}
+                style={{
+                  padding: "1rem",
+                  fontSize: "1.2rem",
+                  backgroundColor: "#f0f9ff",
+                  border: "2px solid #3b82f6",
+                  borderRadius: "0.5rem",
+                  cursor: "pointer",
+                  transition: "background 0.3s"
+                }}
+                onMouseOver={e => e.currentTarget.style.backgroundColor = "#dbeafe"}
+                onMouseOut={e => e.currentTarget.style.backgroundColor = "#f0f9ff"}
+              >
+                {opt}
+              </button>
             ))}
           </div>
-          <div>{feedback}</div>
+
+          <div style={{ fontSize: "1.2rem", color: feedback.startsWith("✅") ? "#10b981" : "#ef4444" }}>
+            {feedback}
+          </div>
         </>
       ) : (
-        <div>Semua pertanyaan selesai 🎉</div>
+        <div style={{ fontSize: "1.2rem", color: "#10b981", marginTop: "1rem" }}>
+          🎉 Semua pertanyaan selesai!
+        </div>
       )}
     </div>
   );
