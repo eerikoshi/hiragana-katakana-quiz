@@ -1,7 +1,35 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+
+// Komponen Button sederhana
+function Button({ children, onClick, variant }) {
+  const base = "px-4 py-2 rounded font-semibold border transition";
+  const variants = {
+    default: "bg-blue-600 text-white hover:bg-blue-700",
+    outline: "border-blue-600 text-blue-600 hover:bg-blue-100",
+  };
+  return (
+    <button
+      onClick={onClick}
+      className={`${base} ${variants[variant] || ""}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+// Komponen Card sederhana
+function Card({ children, className }) {
+  return (
+    <div className={`rounded-xl shadow p-4 bg-white ${className || ""}`}>
+      {children}
+    </div>
+  );
+}
+
+function CardContent({ children, className }) {
+  return <div className={`p-4 ${className || ""}`}>{children}</div>;
+}
 
 const hiraganaData = {
   A: "あ", I: "い", U: "う", E: "え", O: "お",
@@ -142,10 +170,9 @@ export default function GameGabungan() {
   };
 
   return (
-    <div className="p-4 min-h-screen flex flex-col items-center justify-start">
+    <div className="p-4 min-h-screen flex flex-col items-center justify-start bg-gray-50">
       <h1 className="text-3xl font-bold mb-4">🎌 Belajar Jepang</h1>
 
-      {/* Mode */}
       <div className="mb-4 flex gap-2">
         <Button onClick={() => setGameMode("kana")} variant={gameMode === "kana" ? "default" : "outline"}>
           Tebak Kana
