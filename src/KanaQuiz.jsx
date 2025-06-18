@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 const hiraganaData = {
   A: "あ", I: "い", U: "う", E: "え", O: "お",
@@ -13,6 +11,7 @@ const hiraganaData = {
   Ya: "や", Yu: "ゆ", Yo: "よ",
   Ra: "ら", Ri: "り", Ru: "る", Re: "れ", Ro: "ろ",
   Wa: "わ", Wo: "を", N: "ん",
+  // Yoon tambahan contoh
   Kya: "きゃ", Kyu: "きゅ", Kyo: "きょ",
   Sha: "しゃ", Shu: "しゅ", Sho: "しょ",
   Cha: "ちゃ", Chu: "ちゅ", Cho: "ちょ",
@@ -32,6 +31,7 @@ const katakanaData = {
   Ya: "ヤ", Yu: "ユ", Yo: "ヨ",
   Ra: "ラ", Ri: "リ", Ru: "ル", Re: "レ", Ro: "ロ",
   Wa: "ワ", Wo: "ヲ", N: "ン",
+  // Yoon tambahan contoh
   Kya: "キャ", Kyu: "キュ", Kyo: "キョ",
   Sha: "シャ", Shu: "シュ", Sho: "ショ",
   Cha: "チャ", Chu: "チュ", Cho: "チョ",
@@ -40,70 +40,46 @@ const katakanaData = {
   Bya: "ビャ", Byu: "ビュ", Byo: "ビョ"
 };
 
-const kotobaList = [
-  { hiragana: "ひと", kanji: "人", arti: "Orang" },
-  { hiragana: "いえ", kanji: "家", arti: "Rumah" },
-  { hiragana: "くるま", kanji: "車", arti: "Mobil" },
-  { hiragana: "がっこう", kanji: "学校", arti: "Sekolah" },
-  { hiragana: "せんせい", kanji: "先生", arti: "Guru" },
-  { hiragana: "がくせい", kanji: "学生", arti: "Murid / Mahasiswa" },
-  { hiragana: "ともだち", kanji: "友達", arti: "Teman" },
-  { hiragana: "ほん", kanji: "本", arti: "Buku" },
-  { hiragana: "えき", kanji: "駅", arti: "Stasiun" },
-  { hiragana: "おかね", kanji: "お金", arti: "Uang" },
-  // ... bisa lanjutkan sesuai daftar lengkap Anda
-];
-
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
-export default function KanaKotobaQuiz() {
+export default function KanaQuiz() {
   const [mode, setMode] = useState("hiragana");
   const [usedKeys, setUsedKeys] = useState([]);
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState([]);
   const [feedback, setFeedback] = useState("");
-  const [kotoba, setKotoba] = useState(null);
-  const [kotobaOptions, setKotobaOptions] = useState([]);
-  const [kotobaResult, setKotobaResult] = useState("");
 
-  const data = mode === "hiragana" ? hiraganaData : mode === "katakana" ? katakanaData : null;
-  const allKeys = data ? Object.keys(data) : [];
+  const data = mode === "hiragana" ? hiraganaData : katakanaData;
+  const allKeys = Object.keys(data);
 
-  useEffect(() => {
-    if (mode === "kotoba") generateKotoba();
-    else {
-      setUsedKeys([]);
-      generateKana();
-    }
-  }, [mode]);
-
-  const generateKana = () => {
+  const generateQuestion = () => {
     const availableKeys = allKeys.filter(k => !usedKeys.includes(k));
     if (availableKeys.length === 0) {
       setQuestion("");
       return;
     }
+
     const randKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
     const correctAnswer = randKey;
+
     const optionsSet = new Set([correctAnswer]);
-    while (optionsSet.size < 4) {
+    while (optionsSet.size < 4 && optionsSet.size < allKeys.length) {
       const opt = allKeys[Math.floor(Math.random() * allKeys.length)];
       optionsSet.add(opt);
     }
+
     setQuestion(data[randKey]);
-    setOptions(shuffle(Array.from(optionsSet)));
+    setOptions(shuffleArray(Array.from(optionsSet)));
   };
 
-  const handleKanaAnswer = (answer) => {
+  const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
+
+  const handleAnswer = (answer) => {
     const correctRomaji = Object.keys(data).find(key => data[key] === question);
     if (answer === correctRomaji) {
       setFeedback("✅ Benar!");
       setUsedKeys([...usedKeys, correctRomaji]);
       setTimeout(() => {
         setFeedback("");
-        generateKana();
+        generateQuestion();
       }, 1000);
     } else {
       setFeedback(`❌ Salah. Jawaban: ${correctRomaji}`);
@@ -111,72 +87,74 @@ export default function KanaKotobaQuiz() {
     }
   };
 
-  const generateKotoba = () => {
-    const shuffled = shuffle([...kotobaList]);
-    const q = shuffled[0];
-    const choices = shuffle([
-      q.arti,
-      shuffled[1].arti,
-      shuffled[2].arti,
-      shuffled[3].arti
-    ]);
-    setKotoba(q);
-    setKotobaOptions(choices);
-    setKotobaResult("");
-  };
-
-  const checkKotobaAnswer = (selected) => {
-    if (selected === kotoba.arti) {
-      setKotobaResult("✅ Benar!");
-    } else {
-      setKotobaResult(`❌ Salah. Jawaban benar: ${kotoba.arti}`);
-    }
-    setTimeout(generateKotoba, 1500);
-  };
+  useEffect(() => {
+    setUsedKeys([]); // reset saat ganti mode
+    generateQuestion();
+  }, [mode]);
 
   return (
-    <div className="p-6 text-center font-sans">
-      <h1 className="text-2xl font-bold text-blue-600 mb-4">
-        Tebak {mode === "hiragana" ? "Hiragana" : mode === "katakana" ? "Katakana" : "Kotoba"}
+    <div style={{ padding: "2rem", textAlign: "center", fontFamily: "sans-serif" }}>
+      <h1 style={{ fontSize: "2rem", color: "#3b82f6" }}>
+        Tebak {mode === "hiragana" ? "Hiragana" : "Katakana"}
       </h1>
-      <div className="mb-6 space-x-2">
-        <Button onClick={() => setMode("hiragana")} variant={mode === "hiragana" ? "default" : "outline"}>Hiragana</Button>
-        <Button onClick={() => setMode("katakana")} variant={mode === "katakana" ? "default" : "outline"}>Katakana</Button>
-        <Button onClick={() => setMode("kotoba")} variant={mode === "kotoba" ? "default" : "outline"}>Tebak Kotoba</Button>
+
+      <div style={{ margin: "1rem" }}>
+        <button
+          onClick={() => setMode("hiragana")}
+          style={{
+            backgroundColor: mode === "hiragana" ? "#3b82f6" : "#e5e7eb",
+            color: mode === "hiragana" ? "white" : "#1f2937",
+            padding: "0.5rem 1rem",
+            borderRadius: "0.5rem",
+            marginRight: "0.5rem",
+            border: "none"
+          }}
+        >
+          Hiragana
+        </button>
+        <button
+          onClick={() => setMode("katakana")}
+          style={{
+            backgroundColor: mode === "katakana" ? "#3b82f6" : "#e5e7eb",
+            color: mode === "katakana" ? "white" : "#1f2937",
+            padding: "0.5rem 1rem",
+            borderRadius: "0.5rem",
+            border: "none"
+          }}
+        >
+          Katakana
+        </button>
       </div>
 
-      {mode !== "kotoba" && question && (
+      {question ? (
         <>
-          <div className="text-6xl text-gray-800 mb-4">{question}</div>
-          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+          <div style={{ fontSize: "5rem", color: "#333", margin: "1rem" }}>{question}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             {options.map((opt, idx) => (
-              <Button key={idx} onClick={() => handleKanaAnswer(opt)}>{opt}</Button>
+              <button
+                key={idx}
+                onClick={() => handleAnswer(opt)}
+                style={{
+                  padding: "1rem",
+                  fontSize: "1.2rem",
+                  backgroundColor: "#f0f9ff",
+                  border: "2px solid #3b82f6",
+                  borderRadius: "0.5rem",
+                  cursor: "pointer"
+                }}
+                onMouseOver={e => e.currentTarget.style.backgroundColor = "#dbeafe"}
+                onMouseOut={e => e.currentTarget.style.backgroundColor = "#f0f9ff"}
+              >
+                {opt}
+              </button>
             ))}
           </div>
-          <div className="mt-4 text-lg">{feedback}</div>
+          <div style={{ marginTop: "1rem", fontSize: "1.2rem" }}>{feedback}</div>
         </>
-      )}
-
-      {mode === "kotoba" && kotoba && (
-        <>
-          <Card className="w-full max-w-md mb-4 mx-auto">
-            <CardContent className="text-center p-6 text-4xl">
-              {kotoba.hiragana}（{kotoba.kanji}）
-            </CardContent>
-          </Card>
-          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-            {kotobaOptions.map((option, index) => (
-              <Button key={index} onClick={() => checkKotobaAnswer(option)}>
-                {option}
-              </Button>
-            ))}
-          </div>
-          <div className="mt-4 text-lg font-semibold">{kotobaResult}</div>
-        </>
-      )}
-
-      {!question && mode !== "kotoba" && (
-        <div className="text-green-600 text-xl mt-6">🎉 Semua pertanyaan selesai!</div>
+      ) : (
+        <div style={{ fontSize: "1.2rem", color: "#10b981" }}>
+          🎉 Semua pertanyaan selesai!
+        </div>
       )}
     </div>
   );
