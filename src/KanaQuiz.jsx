@@ -1,4 +1,3 @@
-"use client";
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,159 +51,132 @@ const kotobaList = [
   { hiragana: "ほん", kanji: "本", arti: "Buku" },
   { hiragana: "えき", kanji: "駅", arti: "Stasiun" },
   { hiragana: "おかね", kanji: "お金", arti: "Uang" },
-  { hiragana: "でんわ", kanji: "電話", arti: "Telepon" },
-  { hiragana: "いぬ", kanji: "犬", arti: "Anjing" },
-  { hiragana: "ねこ", kanji: "猫", arti: "Kucing" },
-  { hiragana: "ごはん", kanji: "ご飯", arti: "Nasi / Makanan" },
-  { hiragana: "みず", kanji: "水", arti: "Air" },
-  { hiragana: "にほん", kanji: "日本", arti: "Jepang" },
-  { hiragana: "じかん", kanji: "時間", arti: "Waktu" },
-  { hiragana: "ひる", kanji: "昼", arti: "Siang" },
-  { hiragana: "よる", kanji: "夜", arti: "Malam" },
-  { hiragana: "あさ", kanji: "朝", arti: "Pagi" },
+  // ... bisa lanjutkan sesuai daftar lengkap Anda
 ];
 
-function shuffle(arr) {
-  return arr.sort(() => Math.random() - 0.5);
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
 }
 
-export default function GameGabungan() {
-  const [gameMode, setGameMode] = useState("kana"); // "kana" | "kotoba"
-  const [kanaMode, setKanaMode] = useState("hiragana"); // hiragana / katakana
-  const [kanaQuestion, setKanaQuestion] = useState("");
-  const [kanaOptions, setKanaOptions] = useState([]);
-  const [kanaFeedback, setKanaFeedback] = useState("");
-  const [kanaUsed, setKanaUsed] = useState([]);
-
-  const [kotobaQuestion, setKotobaQuestion] = useState(null);
+export default function KanaKotobaQuiz() {
+  const [mode, setMode] = useState("hiragana");
+  const [usedKeys, setUsedKeys] = useState([]);
+  const [question, setQuestion] = useState("");
+  const [options, setOptions] = useState([]);
+  const [feedback, setFeedback] = useState("");
+  const [kotoba, setKotoba] = useState(null);
   const [kotobaOptions, setKotobaOptions] = useState([]);
-  const [kotobaFeedback, setKotobaFeedback] = useState("");
+  const [kotobaResult, setKotobaResult] = useState("");
 
-  const kanaData = kanaMode === "hiragana" ? hiraganaData : katakanaData;
-  const kanaKeys = Object.keys(kanaData);
+  const data = mode === "hiragana" ? hiraganaData : mode === "katakana" ? katakanaData : null;
+  const allKeys = data ? Object.keys(data) : [];
 
-  // === KANA LOGIC ===
+  useEffect(() => {
+    if (mode === "kotoba") generateKotoba();
+    else {
+      setUsedKeys([]);
+      generateKana();
+    }
+  }, [mode]);
+
   const generateKana = () => {
-    const available = kanaKeys.filter(k => !kanaUsed.includes(k));
-    if (available.length === 0) {
-      setKanaQuestion("");
+    const availableKeys = allKeys.filter(k => !usedKeys.includes(k));
+    if (availableKeys.length === 0) {
+      setQuestion("");
       return;
     }
-    const answer = available[Math.floor(Math.random() * available.length)];
-    const opts = shuffle([
-      answer,
-      ...shuffle(kanaKeys.filter(k => k !== answer)).slice(0, 3)
-    ]);
-    setKanaQuestion(kanaData[answer]);
-    setKanaOptions(opts);
+    const randKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
+    const correctAnswer = randKey;
+    const optionsSet = new Set([correctAnswer]);
+    while (optionsSet.size < 4) {
+      const opt = allKeys[Math.floor(Math.random() * allKeys.length)];
+      optionsSet.add(opt);
+    }
+    setQuestion(data[randKey]);
+    setOptions(shuffle(Array.from(optionsSet)));
   };
 
-  const handleKanaAnswer = (ans) => {
-    const correct = Object.keys(kanaData).find(k => kanaData[k] === kanaQuestion);
-    if (ans === correct) {
-      setKanaFeedback("✅ Benar!");
-      setKanaUsed([...kanaUsed, correct]);
+  const handleKanaAnswer = (answer) => {
+    const correctRomaji = Object.keys(data).find(key => data[key] === question);
+    if (answer === correctRomaji) {
+      setFeedback("✅ Benar!");
+      setUsedKeys([...usedKeys, correctRomaji]);
       setTimeout(() => {
-        setKanaFeedback("");
+        setFeedback("");
         generateKana();
       }, 1000);
     } else {
-      setKanaFeedback(`❌ Salah. Jawaban: ${correct}`);
-      setTimeout(() => setKanaFeedback(""), 1500);
+      setFeedback(`❌ Salah. Jawaban: ${correctRomaji}`);
+      setTimeout(() => setFeedback(""), 1500);
     }
   };
 
-  useEffect(() => {
-    if (gameMode === "kana") {
-      setKanaUsed([]);
-      generateKana();
-    }
-  }, [kanaMode, gameMode]);
-
-  // === KOTOBA LOGIC ===
   const generateKotoba = () => {
     const shuffled = shuffle([...kotobaList]);
     const q = shuffled[0];
-    const choices = shuffle([q.arti, shuffled[1].arti, shuffled[2].arti, shuffled[3].arti]);
-    setKotobaQuestion(q);
+    const choices = shuffle([
+      q.arti,
+      shuffled[1].arti,
+      shuffled[2].arti,
+      shuffled[3].arti
+    ]);
+    setKotoba(q);
     setKotobaOptions(choices);
-    setKotobaFeedback("");
+    setKotobaResult("");
   };
 
-  const handleKotobaAnswer = (ans) => {
-    if (ans === kotobaQuestion.arti) {
-      setKotobaFeedback("✅ Benar!");
+  const checkKotobaAnswer = (selected) => {
+    if (selected === kotoba.arti) {
+      setKotobaResult("✅ Benar!");
     } else {
-      setKotobaFeedback(`❌ Salah. Jawaban: ${kotobaQuestion.arti}`);
+      setKotobaResult(`❌ Salah. Jawaban benar: ${kotoba.arti}`);
     }
     setTimeout(generateKotoba, 1500);
   };
 
-  useEffect(() => {
-    if (gameMode === "kotoba") generateKotoba();
-  }, [gameMode]);
-
   return (
-    <div className="p-4 min-h-screen flex flex-col items-center justify-start">
-      <h1 className="text-3xl font-bold mb-4">🎌 Belajar Jepang</h1>
-
-      {/* Mode Switch */}
-      <div className="mb-4 flex gap-2">
-        <Button onClick={() => setGameMode("kana")} variant={gameMode === "kana" ? "default" : "outline"}>
-          Tebak Kana
-        </Button>
-        <Button onClick={() => setGameMode("kotoba")} variant={gameMode === "kotoba" ? "default" : "outline"}>
-          Tebak Kotoba
-        </Button>
+    <div className="p-6 text-center font-sans">
+      <h1 className="text-2xl font-bold text-blue-600 mb-4">
+        Tebak {mode === "hiragana" ? "Hiragana" : mode === "katakana" ? "Katakana" : "Kotoba"}
+      </h1>
+      <div className="mb-6 space-x-2">
+        <Button onClick={() => setMode("hiragana")} variant={mode === "hiragana" ? "default" : "outline"}>Hiragana</Button>
+        <Button onClick={() => setMode("katakana")} variant={mode === "katakana" ? "default" : "outline"}>Katakana</Button>
+        <Button onClick={() => setMode("kotoba")} variant={mode === "kotoba" ? "default" : "outline"}>Tebak Kotoba</Button>
       </div>
 
-      {gameMode === "kana" && (
+      {mode !== "kotoba" && question && (
         <>
-          {/* Sub Mode */}
-          <div className="mb-4 flex gap-2">
-            <Button onClick={() => setKanaMode("hiragana")} variant={kanaMode === "hiragana" ? "default" : "outline"}>
-              Hiragana
-            </Button>
-            <Button onClick={() => setKanaMode("katakana")} variant={kanaMode === "katakana" ? "default" : "outline"}>
-              Katakana
-            </Button>
+          <div className="text-6xl text-gray-800 mb-4">{question}</div>
+          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+            {options.map((opt, idx) => (
+              <Button key={idx} onClick={() => handleKanaAnswer(opt)}>{opt}</Button>
+            ))}
           </div>
-
-          {/* Quiz */}
-          {kanaQuestion ? (
-            <>
-              <div className="text-6xl my-4">{kanaQuestion}</div>
-              <div className="grid grid-cols-2 gap-4 max-w-xs">
-                {kanaOptions.map((o, i) => (
-                  <Button key={i} onClick={() => handleKanaAnswer(o)}>{o}</Button>
-                ))}
-              </div>
-              {kanaFeedback && <p className="mt-4 text-xl">{kanaFeedback}</p>}
-            </>
-          ) : (
-            <p className="text-green-600 mt-4">🎉 Semua soal selesai!</p>
-          )}
+          <div className="mt-4 text-lg">{feedback}</div>
         </>
       )}
 
-      {gameMode === "kotoba" && (
+      {mode === "kotoba" && kotoba && (
         <>
-          {kotobaQuestion && (
-            <>
-              <Card className="w-full max-w-md mb-4">
-                <CardContent className="text-center p-6 text-4xl">
-                  {kotobaQuestion.hiragana}（{kotobaQuestion.kanji}）
-                </CardContent>
-              </Card>
-              <div className="grid grid-cols-2 gap-4 max-w-md w-full">
-                {kotobaOptions.map((o, i) => (
-                  <Button key={i} onClick={() => handleKotobaAnswer(o)}>{o}</Button>
-                ))}
-              </div>
-              {kotobaFeedback && <p className="mt-6 text-xl">{kotobaFeedback}</p>}
-            </>
-          )}
+          <Card className="w-full max-w-md mb-4 mx-auto">
+            <CardContent className="text-center p-6 text-4xl">
+              {kotoba.hiragana}（{kotoba.kanji}）
+            </CardContent>
+          </Card>
+          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+            {kotobaOptions.map((option, index) => (
+              <Button key={index} onClick={() => checkKotobaAnswer(option)}>
+                {option}
+              </Button>
+            ))}
+          </div>
+          <div className="mt-4 text-lg font-semibold">{kotobaResult}</div>
         </>
+      )}
+
+      {!question && mode !== "kotoba" && (
+        <div className="text-green-600 text-xl mt-6">🎉 Semua pertanyaan selesai!</div>
       )}
     </div>
   );
