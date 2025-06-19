@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 
+// Hiragana data
 const hiraganaData = {
   A: "あ", I: "い", U: "う", E: "え", O: "お",
   Ka: "か", Ki: "き", Ku: "く", Ke: "け", Ko: "こ",
@@ -21,6 +22,7 @@ const hiraganaData = {
   Bya: "びゃ", Byu: "びゅ", Byo: "びょ"
 };
 
+// Katakana data
 const katakanaData = {
   A: "ア", I: "イ", U: "ウ", E: "エ", O: "オ",
   Ka: "カ", Ki: "キ", Ku: "ク", Ke: "ケ", Ko: "コ",
@@ -40,16 +42,37 @@ const katakanaData = {
   Bya: "ビャ", Byu: "ビュ", Byo: "ビョ"
 };
 
+// Kotoba data
 const kotobaData = {
-  "ひと": "Orang", "いえ / うち": "Rumah", "くるま": "Mobil", "がっこう": "Sekolah", "せんせい": "Guru", "がくせい": "Murid / Mahasiswa",
-  "ともだち": "Teman", "ほん": "Buku", "えき": "Stasiun", "おかね": "Uang", "でんわ": "Telepon", "いぬ": "Anjing", "ねこ": "Kucing",
-  "ごはん": "Nasi / Makanan", "みず": "Air", "にほん": "Jepang", "じかん": "Waktu", "ひる": "Siang", "よる": "Malam", "あさ": "Pagi",
-  "ちち": "Ayah", "はは": "Ibu", "あに": "Kakak laki-laki", "あね": "Kakak perempuan", "おとうと": "Adik laki-laki", "いもうと": "Adik perempuan",
-  "そふ": "Kakek", "そぼ": "Nenek", "きょうしつ": "Ruang kelas", "つくえ": "Meja", "いす": "Kursi", "じしょ": "Kamus",
-  "しけん": "Ujian", "べんきょう": "Belajar", "きょうかしょ": "Buku pelajaran", "もんだい": "Soal / Masalah", "いしゃ": "Dokter",
-  "かいしゃいん": "Pegawai kantor", "こうむいん": "Pegawai negeri", "ぎんこういん": "Pegawai bank", "せいと": "Murid", "えいぎょう": "Marketing",
-  "まど": "Jendela", "と": "Pintu", "かがみ": "Cermin", "でんき": "Listrik / lampu", "かさ": "Payung", "たな": "Rak", "いえ": "Rumah",
-  "そら": "Langit", "やま": "Gunung", "かわ": "Sungai", "うみ": "Laut", "てんき": "Cuaca", "あめ": "Hujan", "ゆき": "Salju", "かぜ": "Angin"
+  "Kaki": { hiragana: "あし", kanji: "足" },
+  "Bermain": { hiragana: "あそびます", kanji: "遊びます" },
+  "Kepala": { hiragana: "あたま", kanji: "頭" },
+  "Bahaya / Awas": { hiragana: "あぶない", kanji: "危ない" },
+  "Berjalan": { hiragana: "あるきます", kanji: "歩きます" },
+  "Tidak / Bukan": { hiragana: "いいえ", kanji: "いいえ (kana)" },
+  "Saya makan suguhannya": { hiragana: "いただきます", kanji: "頂きます" },
+  "Satu": { hiragana: "いち", kanji: "一" },
+  "Memasukkan": { hiragana: "いれます", kanji: "入れます" },
+  "Indonesia": { hiragana: "インドネシア", kanji: "—" },
+  "Bahasa Indonesia": { hiragana: "インドネシアご", kanji: "インドネシア語" },
+  "Orang Indonesia": { hiragana: "インドネシアじん", kanji: "インドネシア人" },
+  "Menyanyi": { hiragana: "うたいます", kanji: "歌います" },
+  "Lahir": { hiragana: "うまれます", kanji: "生まれます" },
+  "Menjual": { hiragana: "うります", kanji: "売ります" },
+  "Meletakkan": { hiragana: "おきます", kanji: "置きます" },
+  "Mendorong": { hiragana: "おします", kanji: "押します" },
+  "Perut": { hiragana: "おなか", kanji: "お腹" },
+  "Selamat pagi": { hiragana: "おはようございます", kanji: "お早うございます" },
+  "Selamat tidur": { hiragana: "おやすみなさい", kanji: "お休みなさい" },
+  "Berenang": { hiragana: "およぎます", kanji: "泳ぎます" },
+  "Mengembalikan": { hiragana: "かえします", kanji: "返します" },
+  "Keluarga": { hiragana: "かぞく", kanji: "家族" },
+  "Badan": { hiragana: "からだ", kanji: "体" },
+  "Semangat! / Berusahalah": { hiragana: "がんばってください", kanji: "頑張ってください" },
+  "Memakai (pakaian)": { hiragana: "きます", kanji: "着ます" },
+  "Sembilan": { hiragana: "きゅう", kanji: "九" },
+  "Sembilan puluh": { hiragana: "きゅうじゅう", kanji: "九十" },
+  "IM JAPAN": { hiragana: "アイム・ジャパン", kanji: "—" }
 };
 
 export default function KanaQuiz() {
@@ -68,24 +91,24 @@ export default function KanaQuiz() {
       setQuestion("");
       return;
     }
-
     const randKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
-    const correctAnswer = randKey;
-
-    const optionsSet = new Set([correctAnswer]);
+    const optionsSet = new Set([randKey]);
     while (optionsSet.size < 4 && optionsSet.size < allKeys.length) {
-      const opt = allKeys[Math.floor(Math.random() * allKeys.length)];
-      optionsSet.add(opt);
+      optionsSet.add(allKeys[Math.floor(Math.random() * allKeys.length)]);
     }
 
-    setQuestion(data[randKey]);
-    setOptions(shuffleArray(Array.from(optionsSet)));
+    setQuestion(mode === "kotoba" ? randKey : data[randKey]);
+    setOptions(shuffleArray([...optionsSet]));
   };
 
-  const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
-
   const handleAnswer = (answer) => {
-    const correctKey = Object.keys(data).find(key => data[key] === question);
+    let correctKey;
+    if (mode === "kotoba") {
+      correctKey = question;
+    } else {
+      correctKey = Object.keys(data).find(k => data[k] === question);
+    }
+
     if (answer === correctKey) {
       setFeedback("✅ Benar!");
       setUsedKeys([...usedKeys, correctKey]);
@@ -94,10 +117,17 @@ export default function KanaQuiz() {
         generateQuestion();
       }, 1000);
     } else {
-      setFeedback(`❌ Salah. Jawaban: ${correctKey}`);
+      if (mode === "kotoba") {
+        const correct = kotobaData[correctKey];
+        setFeedback(`❌ Salah. Jawaban: ${correct.kanji} (${correct.hiragana})`);
+      } else {
+        setFeedback(`❌ Salah. Jawaban: ${correctKey}`);
+      }
       setTimeout(() => setFeedback(""), 1500);
     }
   };
+
+  const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
 
   useEffect(() => {
     setUsedKeys([]);
@@ -111,49 +141,27 @@ export default function KanaQuiz() {
       </h1>
 
       <div style={{ margin: "1rem" }}>
-        <button
-          onClick={() => setMode("hiragana")}
-          style={{
-            backgroundColor: mode === "hiragana" ? "#3b82f6" : "#e5e7eb",
-            color: mode === "hiragana" ? "white" : "#1f2937",
-            padding: "0.5rem 1rem",
-            borderRadius: "0.5rem",
-            marginRight: "0.5rem",
-            border: "none"
-          }}
-        >
-          Hiragana
-        </button>
-        <button
-          onClick={() => setMode("katakana")}
-          style={{
-            backgroundColor: mode === "katakana" ? "#3b82f6" : "#e5e7eb",
-            color: mode === "katakana" ? "white" : "#1f2937",
-            padding: "0.5rem 1rem",
-            borderRadius: "0.5rem",
-            marginRight: "0.5rem",
-            border: "none"
-          }}
-        >
-          Katakana
-        </button>
-        <button
-          onClick={() => setMode("kotoba")}
-          style={{
-            backgroundColor: mode === "kotoba" ? "#3b82f6" : "#e5e7eb",
-            color: mode === "kotoba" ? "white" : "#1f2937",
-            padding: "0.5rem 1rem",
-            borderRadius: "0.5rem",
-            border: "none"
-          }}
-        >
-          Kotoba
-        </button>
+        {["hiragana", "katakana", "kotoba"].map((m) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            style={{
+              backgroundColor: mode === m ? "#3b82f6" : "#e5e7eb",
+              color: mode === m ? "white" : "#1f2937",
+              padding: "0.5rem 1rem",
+              borderRadius: "0.5rem",
+              marginRight: "0.5rem",
+              border: "none"
+            }}
+          >
+            {m.charAt(0).toUpperCase() + m.slice(1)}
+          </button>
+        ))}
       </div>
 
       {question ? (
         <>
-          <div style={{ fontSize: "5rem", color: "#333", margin: "1rem" }}>{question}</div>
+          <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>{question}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             {options.map((opt, idx) => (
               <button
@@ -167,19 +175,24 @@ export default function KanaQuiz() {
                   borderRadius: "0.5rem",
                   cursor: "pointer"
                 }}
-                onMouseOver={e => e.currentTarget.style.backgroundColor = "#dbeafe"}
-                onMouseOut={e => e.currentTarget.style.backgroundColor = "#f0f9ff"}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#dbeafe"}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#f0f9ff"}
               >
-                {opt}
+                {mode === "kotoba" ? (
+                  <>
+                    <div style={{ fontSize: "1.5rem" }}>{kotobaData[opt]?.kanji ?? "?"}</div>
+                    <div style={{ fontSize: "1rem", color: "#555" }}>{kotobaData[opt]?.hiragana ?? "?"}</div>
+                  </>
+                ) : (
+                  data[opt]
+                )}
               </button>
             ))}
           </div>
           <div style={{ marginTop: "1rem", fontSize: "1.2rem" }}>{feedback}</div>
         </>
       ) : (
-        <div style={{ fontSize: "1.2rem", color: "#10b981" }}>
-          🎉 Semua pertanyaan selesai!
-        </div>
+        <div style={{ fontSize: "1.2rem", color: "#10b981" }}>🎉 Semua pertanyaan selesai!</div>
       )}
     </div>
   );
