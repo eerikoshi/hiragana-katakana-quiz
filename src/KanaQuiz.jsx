@@ -729,6 +729,29 @@ const kotobaData = {
     "Sempit / Ketat / Ketat banget": { hiragana: "きつい", kanji: "きつい" }
 };
 
+const hewanData = {
+    "Anjing": { kanji: "犬", hiragana: "いぬ", romaji: "inu" },
+    "Kucing": { kanji: "猫", hiragana: "ねこ", romaji: "neko" },
+    "Kuda": { kanji: "馬", hiragana: "うま", romaji: "uma" },
+    "Sapi": { kanji: "牛", hiragana: "うし", romaji: "ushi" },
+    "Babi": { kanji: "豚", hiragana: "ぶた", romaji: "buta" },
+    "Domba": { kanji: "羊", hiragana: "ひつじ", romaji: "hitsuji" },
+    "Ayam": { kanji: "鶏", hiragana: "にわとり", romaji: "niwatori" },
+    "Gajah": { kanji: "象", hiragana: "ぞう", romaji: "zō" },
+    "Monyet": { kanji: "猿", hiragana: "さる", romaji: "saru" },
+    "Harimau": { kanji: "虎", hiragana: "とら", romaji: "tora" },
+    "Singa": { kanji: "獅子", hiragana: "しし", romaji: "shishi" },
+    "Ikan": { kanji: "魚", hiragana: "さかな", romaji: "sakana" },
+    "Ular": { kanji: "蛇", hiragana: "へび", romaji: "hebi" },
+    "Burung": { kanji: "鳥", hiragana: "とり", romaji: "tori" },
+    "Kura-kura": { kanji: "亀", hiragana: "かめ", romaji: "kame" },
+    "Kelinci": { kanji: "兎", hiragana: "うさぎ", romaji: "usagi" },
+    "Serigala": { kanji: "狼", hiragana: "おおかみ", romaji: "ōkami" },
+    "Beruang": { kanji: "熊", hiragana: "くま", romaji: "kuma" },
+    "Tikus": { kanji: "鼠", hiragana: "ねずみ", romaji: "nezumi" },
+    "Rusa": { kanji: "鹿", hiragana: "しか", romaji: "shika" }
+};
+
 export default function KanaQuiz() {
     const [mode, setMode] = useState("hiragana");
     const [usedKeys, setUsedKeys] = useState([]);
@@ -736,7 +759,14 @@ export default function KanaQuiz() {
     const [options, setOptions] = useState([]);
     const [feedback, setFeedback] = useState("");
 
-    const data = mode === "hiragana" ? hiraganaData : mode === "katakana" ? katakanaData : kotobaData;
+    const getData = () => {
+        if (mode === "hiragana") return hiraganaData;
+        if (mode === "katakana") return katakanaData;
+        if (mode === "kotoba") return kotobaData;
+        if (mode === "hewan") return hewanData;
+    };
+
+    const data = getData();
     const allKeys = Object.keys(data);
 
     const generateQuestion = () => {
@@ -751,16 +781,20 @@ export default function KanaQuiz() {
             optionsSet.add(allKeys[Math.floor(Math.random() * allKeys.length)]);
         }
 
-        setQuestion(mode === "kotoba" ? randKey : data[randKey]);
+        if (mode === "hiragana" || mode === "katakana") {
+            setQuestion(data[randKey]);
+        } else {
+            setQuestion(randKey);
+        }
         setOptions(shuffleArray([...optionsSet]));
     };
 
     const handleAnswer = (answer) => {
         let correctKey;
-        if (mode === "kotoba") {
-            correctKey = question;
-        } else {
+        if (mode === "hiragana" || mode === "katakana") {
             correctKey = Object.keys(data).find(k => data[k] === question);
+        } else {
+            correctKey = question;
         }
 
         if (answer === correctKey) {
@@ -774,6 +808,9 @@ export default function KanaQuiz() {
             if (mode === "kotoba") {
                 const correct = kotobaData[correctKey];
                 setFeedback(`❌ Salah. Jawaban: ${correct.kanji} (${correct.hiragana})`);
+            } else if (mode === "hewan") {
+                const correct = hewanData[correctKey];
+                setFeedback(`❌ Salah. Jawaban: ${correct.kanji} (${correct.hiragana}) - ${correct.romaji}`);
             } else {
                 setFeedback(`❌ Salah. Jawaban: ${correctKey}`);
             }
@@ -791,11 +828,11 @@ export default function KanaQuiz() {
     return (
         <div style={{ backgroundColor: "#d1d5db", minHeight: "100vh", padding: "2rem", textAlign: "center", fontFamily: "sans-serif" }}>
             <h1 style={{ fontSize: "2rem", color: "#3b82f6" }}>
-                Tebak {mode === "hiragana" ? "Hiragana" : mode === "katakana" ? "Katakana" : "Kotoba"}
+                Tebak {mode.charAt(0).toUpperCase() + mode.slice(1)}
             </h1>
 
             <div style={{ margin: "1rem" }}>
-                {["hiragana", "katakana", "kotoba"].map((m) => (
+                {["hiragana", "katakana", "kotoba", "hewan"].map((m) => (
                     <button
                         key={m}
                         onClick={() => setMode(m)}
@@ -832,14 +869,18 @@ export default function KanaQuiz() {
                                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#dbeafe"}
                                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#f0f9ff"}
                             >
-                                {mode === "kotoba" ? (
-                                    <>
-                                        <div style={{ fontSize: "1.5rem" }}>{kotobaData[opt]?.kanji ?? "?"}</div>
-                                        <div style={{ fontSize: "1rem", color: "#555" }}>{kotobaData[opt]?.hiragana ?? "?"}</div>
-                                    </>
-                                ) : (
-                                    data[opt]
-                                )}
+                                {mode === "hiragana" || mode === "katakana" ? opt
+                                    : mode === "kotoba" ? (
+                                        <>
+                                            <div style={{ fontSize: "1.5rem" }}>{kotobaData[opt]?.kanji ?? "?"}</div>
+                                            <div style={{ fontSize: "1rem", color: "#555" }}>{kotobaData[opt]?.hiragana ?? "?"}</div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div style={{ fontSize: "1.5rem" }}>{hewanData[opt]?.kanji ?? "?"}</div>
+                                            <div style={{ fontSize: "1rem", color: "#555" }}>{hewanData[opt]?.hiragana ?? "?"}</div>
+                                        </>
+                                    )}
                             </button>
                         ))}
                     </div>
